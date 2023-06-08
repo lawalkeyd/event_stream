@@ -78,7 +78,7 @@ class EventProducers(Document):
 			)
 
 			response = producer_site.post_api(
-				"event_streaming.event_streaming.doctype.event_consumers.event_consumers.register_consumer",
+				"event_stream.event_stream.doctype.event_consumers.event_consumers.register_consumer",
 				params={"data": json.dumps(self.get_request_data())},
 			)
 			if response:
@@ -398,7 +398,7 @@ def get_updates(producer_site, last_update, doctypes):
 	"""Get all updates generated after the last update timestamp"""
 	docs = producer_site.post_request(
 		{
-			"cmd": "event_streaming.event_streaming.doctype.event_update_logs.event_update_logs.get_update_logs_for_consumer",
+			"cmd": "event_stream.event_stream.doctype.event_update_logs.event_update_logs.get_update_logs_for_consumer",
 			"event_consumer": get_url(),
 			"doctypes": frappe.as_json(doctypes),
 			"last_update": last_update,
@@ -552,7 +552,7 @@ def get_mapped_update(update, producer_site):
 @frappe.whitelist()
 def new_event_notification(producer_url):
 	"""Pull data from producer when notified"""
-	enqueued_method = "event_streaming.event_streaming.doctype.event_producers.event_producers.pull_from_node"
+	enqueued_method = "event_stream.event_stream.doctype.event_producers.event_producers.pull_from_node"
 	jobs = get_jobs()
 	if not jobs or enqueued_method not in jobs[frappe.local.site]:
 		frappe.enqueue(enqueued_method, queue="default", **{"event_producers": producer_url})

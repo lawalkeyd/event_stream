@@ -13,7 +13,7 @@ class EventUpdateLogs(Document):
 		"""Send update notification updates to event consumers
 		whenever update log is generated"""
 		enqueued_method = (
-			"event_streaming.event_streaming.doctype.event_consumers.event_consumers.notify_event_consumers"
+			"event_stream.event_stream.doctype.event_consumers.event_consumers.notify_event_consumers"
 		)
 		jobs = get_jobs()
 		if not jobs or enqueued_method not in jobs[frappe.local.site]:
@@ -260,7 +260,7 @@ def get_update_logs_for_consumer(event_consumer, doctypes, last_update):
 	if isinstance(doctypes, str):
 		doctypes = frappe.parse_json(doctypes)
 
-	from event_streaming.event_streaming.doctype.event_consumers.event_consumers import has_consumer_access
+	from event_stream.event_stream.doctype.event_consumers.event_consumers import has_consumer_access
 
 	consumer = frappe.get_doc("Event Consumers", event_consumer)
 	docs = frappe.get_list(
