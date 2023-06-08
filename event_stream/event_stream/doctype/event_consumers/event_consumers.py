@@ -72,7 +72,7 @@ def register_consumer(data):
 	"""create an event consumer document for registering a consumer"""
 	data = json.loads(data)
 	# to ensure that consumer is created only once
-	if frappe.db.exists("Event Consumers", data["event_consumers"]):
+	if frappe.db.exists("Event Consumers", data["event_consumer"]):
 		return None
 
 	user = data["user"]
@@ -83,7 +83,7 @@ def register_consumer(data):
 		frappe.throw(_("Event Subscriber has to be a System Manager."))
 
 	consumer = frappe.new_doc("Event Consumers")
-	consumer.callback_url = data["event_consumers"]
+	consumer.callback_url = data["event_consumer"]
 	consumer.user = data["user"]
 	consumer.api_key = data["api_key"]
 	consumer.api_secret = data["api_secret"]
@@ -127,7 +127,7 @@ def get_last_update():
 
 
 @frappe.whitelist()
-def notify_event_consumerss(doctype):
+def notify_event_consumers(doctype):
 	"""get all event consumers and set flag for notification status"""
 	event_consumerss = frappe.get_all(
 		"Event Consumers Document Type", ["parent"], {"ref_doctype": doctype, "status": "Approved"}
