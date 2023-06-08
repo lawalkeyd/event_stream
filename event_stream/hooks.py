@@ -159,6 +159,16 @@ app_license = "MIT"
 
 # ignore_links_on_delete = ["Communication", "ToDo"]
 
+
+doc_events = {
+    "*": {
+        "after_insert": "event_stream.event_stream.doctype.event_update_logs.event_update_logs.notify_consumers",
+        "on_update": "event_stream.event_stream.doctype.event_update_logs.event_update_logs.notify_consumers",
+        "on_cancel": "event_stream.event_stream.doctype.event_update_logs.event_update_logs.notify_consumers",
+        "on_trash": "event_stream.event_stream.doctype.event_update_logs.event_update_logs.notify_consumers"
+    }
+}
+
 # Request Events
 # ----------------
 # before_request = ["event_stream.utils.before_request"]

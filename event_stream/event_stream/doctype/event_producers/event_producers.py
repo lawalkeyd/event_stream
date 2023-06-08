@@ -57,7 +57,7 @@ class EventProducers(Document):
 			self.reload()
 
 	def on_trash(self):
-		last_update = frappe.db.get_value("Event Producers Last Update", dict(event_producers=self.name))
+		last_update = frappe.db.get_value("Event Producers Last Update", dict(event_producer=self.name))
 		if last_update:
 			frappe.delete_doc("Event Producers Last Update", last_update)
 
@@ -93,13 +93,13 @@ class EventProducers(Document):
 
 	def set_last_update(self, last_update):
 		last_update_doc_name = frappe.db.get_value(
-			"Event Producers Last Update", dict(event_producers=self.name)
+			"Event Producers Last Update", dict(event_producer=self.name)
 		)
 		if not last_update_doc_name:
 			frappe.get_doc(
 				dict(
 					doctype="Event Producers Last Update",
-					event_producers=self.producer_url,
+					event_producer=self.producer_url,
 					last_update=last_update,
 				)
 			).insert(ignore_permissions=True)
@@ -110,7 +110,7 @@ class EventProducers(Document):
 
 	def get_last_update(self):
 		return frappe.db.get_value(
-			"Event Producers Last Update", dict(event_producers=self.name), "last_update"
+			"Event Producers Last Update", dict(event_producer=self.name), "last_update"
 		)
 
 	def get_request_data(self):

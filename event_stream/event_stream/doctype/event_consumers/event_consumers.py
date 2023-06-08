@@ -28,7 +28,7 @@ class EventConsumers(Document):
 			if doc_before_save.api_key != self.api_key or doc_before_save.api_secret != self.api_secret:
 				return
 
-			self.update_consumer_status()
+			# self.update_consumer_status()
 		else:
 			frappe.db.set_value(self.doctype, self.name, "incoming_change", 0)
 
