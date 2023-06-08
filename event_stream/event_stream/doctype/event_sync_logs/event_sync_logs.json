@@ -1,0 +1,125 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-06-08 16:57:22.546617",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "update_type",
+  "ref_doctype",
+  "docname",
+  "column_break_g52u",
+  "status",
+  "event_producer",
+  "producer_doc",
+  "event_configurations_section",
+  "use_same_name",
+  "column_break_ady8",
+  "mapping",
+  "data_section",
+  "data",
+  "error"
+ ],
+ "fields": [
+  {
+   "fieldname": "update_type",
+   "fieldtype": "Select",
+   "label": "Update Type"
+  },
+  {
+   "fieldname": "ref_doctype",
+   "fieldtype": "Link",
+   "label": "DocType",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "docname",
+   "fieldtype": "Data",
+   "label": "Document Name",
+   "options": "ref_doctype"
+  },
+  {
+   "fieldname": "column_break_g52u",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nSynced\nFailed"
+  },
+  {
+   "fieldname": "event_producer",
+   "fieldtype": "Data",
+   "label": "Event Producer",
+   "options": "Event Producers"
+  },
+  {
+   "fieldname": "producer_doc",
+   "fieldtype": "Data",
+   "label": "Producer Document Name"
+  },
+  {
+   "fieldname": "event_configurations_section",
+   "fieldtype": "Section Break",
+   "label": "Event Configurations"
+  },
+  {
+   "fieldname": "use_same_name",
+   "fieldtype": "Data",
+   "label": "Use Same Name"
+  },
+  {
+   "fieldname": "column_break_ady8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mapping",
+   "fieldtype": "Data",
+   "label": "Mapping"
+  },
+  {
+   "fieldname": "data_section",
+   "fieldtype": "Section Break",
+   "label": "Data"
+  },
+  {
+   "fieldname": "data",
+   "fieldtype": "Code",
+   "label": "Data"
+  },
+  {
+   "fieldname": "error",
+   "fieldtype": "Code",
+   "label": "Error"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-06-08 16:58:11.416258",
+ "modified_by": "Administrator",
+ "module": "Event Stream",
+ "name": "Event Sync Logs",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
