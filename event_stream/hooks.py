@@ -113,6 +113,13 @@ app_license = "MIT"
 # Scheduled Tasks
 # ---------------
 
+scheduler_events = {
+	"hourly": [
+		"event_stream.event_stream.doctype.event_producers.event_producers.pull_all_producers_events"
+	]
+}
+
+
 # scheduler_events = {
 #	"all": [
 #		"event_stream.tasks.all"

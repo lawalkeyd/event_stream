@@ -230,13 +230,13 @@ def pull_producer_data():
 
 
 @frappe.whitelist()
-def pull_from_node(event_producers):
+def pull_from_node(event_producer):
 	"""pull all updates after the last update timestamp from event producer site"""
-	event_producers = frappe.get_doc("Event Producers", event_producers)
-	producer_site = get_producer_site(event_producers.producer_url)
-	last_update = event_producers.get_last_update()
+	event_producer = frappe.get_doc("Event Producers", event_producer)
+	producer_site = get_producer_site(event_producer.producer_url)
+	last_update = event_producer.get_last_update()
 
-	(doctypes, mapping_config, naming_config) = get_config(event_producers.producer_doctypes)
+	(doctypes, mapping_config, naming_config) = get_config(event_producer.producer_doctypes)
 
 	updates = get_updates(producer_site, last_update, doctypes)
 
@@ -249,7 +249,7 @@ def pull_from_node(event_producers):
 		if not update.update_type == "Delete":
 			update.data = json.loads(update.data)
 
-		sync(update, producer_site, event_producers)
+		sync(update, producer_site, event_producer)
 
 
 def get_config(event_config):
@@ -271,31 +271,31 @@ def get_config(event_config):
 	return (doctypes, mapping_config, naming_config)
 
 
-def sync(update, producer_site, event_producers, in_retry=False):
+def sync(update, producer_site, event_producer, in_retry=False):
 	"""Sync the individual update"""
 	try:
 		if update.update_type == "Create":
-			set_insert(update, producer_site, event_producers.name)
+			set_insert(update, producer_site, event_producer.name)
 		if update.update_type == "Update":
 			set_update(update, producer_site)
 		if update.update_type == "Delete":
 			set_delete(update)
 		if in_retry:
 			return "Synced"
-		log_event_sync(update, event_producers.name, "Synced")
+		log_event_sync(update, event_producer.name, "Synced")
 
 	except Exception:
 		if in_retry:
 			if frappe.flags.in_test:
 				print(frappe.get_traceback())
 			return "Failed"
-		log_event_sync(update, event_producers.name, "Failed", frappe.get_traceback())
+		log_event_sync(update, event_producer.name, "Failed", frappe.get_traceback())
 
-	event_producers.set_last_update(update.creation)
+	event_producer.set_last_update(update.creation)
 	frappe.db.commit()
 
 
-def set_insert(update, producer_site, event_producers):
+def set_insert(update, producer_site, event_producer):
 	"""Sync insert type update"""
 	if frappe.db.get_value(update.ref_doctype, update.docname):
 		# doc already created
@@ -316,7 +316,7 @@ def set_insert(update, producer_site, event_producers):
 		# if event consumer is not saving documents with the same name as the producer
 		# store the remote docname in a custom field for future updates
 		doc.remote_docname = update.docname
-		doc.remote_site_name = event_producers
+		doc.remote_site_name = event_producer
 		doc.insert(set_child_names=False)
 
 
@@ -512,13 +512,13 @@ def sync_mapped_dependencies(dependencies, producer_site):
 	return dependencies_created
 
 
-def log_event_sync(update, event_producers, sync_status, error=None):
+def log_event_sync(update, event_producer, sync_status, error=None):
 	"""Log event update received with the sync_status as Synced or Failed"""
 	doc = frappe.new_doc("Event Sync Logs")
 	doc.update_type = update.update_type
 	doc.ref_doctype = update.ref_doctype
 	doc.status = sync_status
-	doc.event_producers = event_producers
+	doc.event_producer = event_producer
 	doc.producer_doc = update.docname
 	doc.data = frappe.as_json(update.data)
 	doc.use_same_name = update.use_same_name
@@ -557,14 +557,24 @@ def new_event_notification(producer_url):
 	if not jobs or enqueued_method not in jobs[frappe.local.site]:
 		frappe.enqueue(enqueued_method, queue="default", **{"event_producer": producer_url})
 
+@frappe.whitelist()
+def pull_all_producers_events():
+	"""Pull data from all producers"""
+	enqueued_method = "event_stream.event_stream.doctype.event_producers.event_producers.pull_from_node"
+	jobs = get_jobs()
+	producers = frappe.db.get_all("Event Producers", pluck="producer_url")
+	if (not jobs or enqueued_method not in jobs[frappe.local.site]) and producers:
+		for producer_url in producers:
+			frappe.enqueue(enqueued_method, queue="default", **{"event_producer": producer_url})
+
 
 @frappe.whitelist()
 def resync(update):
 	"""Retry syncing update if failed"""
 	update = frappe._dict(json.loads(update))
-	producer_site = get_producer_site(update.event_producers)
-	event_producers = frappe.get_doc("Event Producers", update.event_producers)
+	producer_site = get_producer_site(update.event_producer)
+	event_producer = frappe.get_doc("Event Producers", update.event_producer)
 	if update.mapping:
 		update = get_mapped_update(update, producer_site)
 		update.data = json.loads(update.data)
-	return sync(update, producer_site, event_producers, in_retry=True)
+	return sync(update, producer_site, event_producer, in_retry=True)
