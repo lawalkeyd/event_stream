@@ -12,6 +12,7 @@ from frappe.frappeclient import FrappeClient
 from frappe.model.document import Document
 from frappe.utils.background_jobs import get_jobs
 from frappe.utils.data import get_url
+from frappe.utils import now
 
 
 class EventConsumers(Document):
@@ -142,7 +143,10 @@ def notify_event_consumers(doctype):
 def notify(consumer):
 	"""notify individual event consumers about a new update"""
 	consumer_status = consumer.get_consumer_status()
-	if consumer_status == "online":
+	if consumer_status == "online" and consumer.is_producer_offline:
+		sync_local(consumer)
+		consumer.flags.notified = True
+	elif consumer_status == "online":
 		try:
 			client = get_consumer_site(consumer.callback_url)
 			client.post_request(
@@ -165,6 +169,34 @@ def notify(consumer):
 			frappe.enqueue(
 				enqueued_method, queue="long", enqueue_after_commit=True, **{"consumer": consumer}
 			)
+
+def sync_local(consumer):
+	update = get_last_update()
+	cbt_activities = frappe.db.get_all("CBT Activity", filters={
+		'date': ['>', update]
+	})
+	consumer_site = get_consumer_site(consumer.callback_url)
+	for activity in cbt_activities:
+		cbt_activity = frappe.get_doc("CBT Activity", activity)
+		consumer_site.insert(cbt_activity)
+
+
+
+
+def get_last_local_update(consumer):
+	try:
+		return frappe.db.get_value(
+			"Event Consumers Last Update", dict(event_consumer=consumer), "last_update"
+		)
+	except:
+		return frappe.get_doc(
+			dict(
+				doctype="Event Consumers Last Update",
+				event_consumer=consumer,
+				last_update=now(),
+			)
+		).insert(ignore_permissions=True)
+
 
 
 def has_consumer_access(consumer, update_log):
