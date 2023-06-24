@@ -46,6 +46,10 @@ def notify_consumers(doc, event):
 
 def check_doctype_has_consumers(doctype):
 	"""Check if doctype has event consumers for event streaming"""
+	return frappe.db.get_all("Event Consumers Document Type", filters={
+		"status": "Approved", 
+		"unsubscribed": 0
+	})
 	return frappe.cache_manager.get_doctype_map(
 		"Event Consumers Document Type",
 		doctype,
