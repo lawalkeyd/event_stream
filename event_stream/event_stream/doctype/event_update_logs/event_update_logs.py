@@ -47,6 +47,7 @@ def notify_consumers(doc, event):
 def check_doctype_has_consumers(doctype):
 	"""Check if doctype has event consumers for event streaming"""
 	return frappe.db.get_all("Event Consumers Document Type", filters={
+		"ref_doctype": doctype,
 		"status": "Approved", 
 		"unsubscribed": 0
 	})
