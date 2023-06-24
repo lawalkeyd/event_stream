@@ -265,7 +265,7 @@ def get_update_logs_for_consumer(event_consumer, doctypes, last_update):
 	if isinstance(doctypes, str):
 		doctypes = frappe.parse_json(doctypes)
 
-	# from event_stream.event_stream.doctype.event_consumers.event_consumers import has_consumer_access
+	from event_stream.event_stream.doctype.event_consumers.event_consumers import has_consumer_access
 
 	consumer = frappe.get_doc("Event Consumers", event_consumer)
 	docs = frappe.get_list(
@@ -278,25 +278,25 @@ def get_update_logs_for_consumer(event_consumer, doctypes, last_update):
 	result = []
 	to_update_history = []
 	for d in docs:
-		# if (d.ref_doctype, d.docname) in to_update_history:
-		# 	# will be notified by background jobs
-		# 	continue
+		if (d.ref_doctype, d.docname) in to_update_history:
+			# will be notified by background jobs
+			continue
 
-		# if not has_consumer_access(consumer=consumer, update_log=d):
-		# 	continue
+		if not has_consumer_access(consumer=consumer, update_log=d):
+			continue
 
-		# if not is_consumer_uptodate(d, consumer):
-		# 	to_update_history.append((d.ref_doctype, d.docname))
-		# 	# get_unread_update_logs will have the current log
-		# 	old_logs = get_unread_update_logs(consumer.name, d.ref_doctype, d.docname)
-		# 	if old_logs:
-		# 		old_logs.reverse()
-		# 		result.extend(old_logs)
-		# else:
-		result.append(d)
+		if not is_consumer_uptodate(d, consumer):
+			to_update_history.append((d.ref_doctype, d.docname))
+			# get_unread_update_logs will have the current log
+			old_logs = get_unread_update_logs(consumer.name, d.ref_doctype, d.docname)
+			if old_logs:
+				old_logs.reverse()
+				result.extend(old_logs)
+		else:
+			result.append(d)
 
-	# for d in result:
-	# 	mark_consumer_read(update_log_name=d.name, consumer_name=consumer.name)
+	for d in result:
+		mark_consumer_read(update_log_name=d.name, consumer_name=consumer.name)
 
 	result.reverse()
 	return result
